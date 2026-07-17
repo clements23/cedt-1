@@ -156,7 +156,7 @@ Runs on schedule (launchd/cron) or manually (`cedt1 decay`):
 
 ### OpenCode
 
-1. `cedt1 inject` writes `~/.config/opencode/memory/taste-profile.md`
+1. `cedt1 inject` writes `~/.config/opencode/memory/tuning-profile.md`
 2. File is in `opencode.json` `instructions` array → loaded into every session's system prompt
 3. Rules are formatted with binding levels: BINDING (≥0.85), PREFERRED (0.55-0.84), SUGGEST (0.30-0.54)
 4. A companion skill (`continuous-learning`) tells the agent how to detect corrections and run `cedt1 learn`
@@ -164,7 +164,7 @@ Runs on schedule (launchd/cron) or manually (`cedt1 decay`):
 ### Any Agent (generic)
 
 ```bash
-cedt1 export > /path/to/agent/context/taste.md
+cedt1 export > /path/to/agent/context/preferences.md
 ```
 
 Produces clean markdown. Pipe it wherever your agent reads context files.

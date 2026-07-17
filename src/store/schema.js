@@ -1,6 +1,6 @@
 // The typed rule model for CEDT-1.
 //
-// A rule is the atomic unit of taste. Key fields:
+// A rule is the atomic unit of preference. Key fields:
 // - id: stable identifier for updates and supersession references
 // - text: imperative constraint (e.g. "Never use em dashes.")
 // - category: free-form grouping (communication, content, code, git, general, etc.)

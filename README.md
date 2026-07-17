@@ -1,6 +1,6 @@
 # CEDT-1
 
-**Continuous Experience-Driven Taste — a preference learning engine for AI agents.**
+**Continuous Experience-Driven Tuning — a preference learning engine for AI agents.**
 
 CEDT-1 gives AI agents memory of your preferences. Instead of repeating yourself every session, the agent learns from your corrections and gets better over time. Every "no, do it this way" compounds into a structured rule that shapes future behavior.
 
@@ -120,7 +120,7 @@ CEDT-1 is agent-agnostic. The engine runs as a CLI. Integration is two lines:
 cedt1 status       Show rule counts by category
 cedt1 add <text>   Add a rule explicitly
 cedt1 learn <text> Extract and persist a rule from a correction
-cedt1 inject       Write taste profile to agent's context
+cedt1 inject       Write tuning profile to agent's context
 cedt1 export       Emit plain markdown (any agent)
 cedt1 decay        Run confidence decay + archive
 cedt1 sync         Git commit + pull + push

@@ -1,6 +1,6 @@
 # continuous-learning
 
-Continuously learn user preferences from every interaction. Detects corrections, extracts structured rules, and persists them to the CEDT-1 taste store. Rules compound over time — confidence increases with reinforcement, decays with silence.
+Continuously learn user preferences from every interaction. Detects corrections, extracts structured rules, and persists them to the CEDT-1 rule store. Rules compound over time — confidence increases with reinforcement, decays with silence.
 
 ## When to Fire
 
@@ -56,11 +56,11 @@ Review the session transcript. For every output the user did NOT correct:
 - For each uncorrected output, identify which rules were applied and reinforce them
 
 ### 2. Rule Injection
-Run `cedt1 inject` to write the updated taste profile to opencode's memory directory:
+Run `cedt1 inject` to write the updated tuning profile to opencode's memory directory:
 ```bash
 cedt1 inject
 ```
-This writes `~/.config/opencode/memory/taste-profile.md` with all rules >= 0.6 confidence, formatted with binding levels.
+This writes `~/.config/opencode/memory/tuning-profile.md` with all rules >= 0.6 confidence, formatted with binding levels.
 
 ### 3. Decay Check
 Run `cedt1 decay` to decay stale rules:
@@ -117,7 +117,7 @@ Each rule in `~/.cedt1/rules/<category>.yaml`:
 cedt1 status          # Show rule counts + conflicts
 cedt1 learn "<text>"  # Extract and persist a rule from a correction
 cedt1 add "<text>"    # Manually add a rule
-cedt1 inject          # Write taste profile to opencode memory
+cedt1 inject          # Write tuning profile to opencode memory
 cedt1 export          # Print full markdown export
 cedt1 decay           # Run confidence decay + archive
 cedt1 sync            # Git commit + pull + push

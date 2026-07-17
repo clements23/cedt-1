@@ -16,9 +16,9 @@ Per-session evolution log. Every build session documented.
 | `sync/` | Git-backed cross-machine sync |
 | `migrate/` | Multi-source import from existing config stores |
 | `cli/` | Full CLI surface — status, add, learn, inject, export, decay, sync, migrate |
-| `opencode/` | OpenCode agent integration — writes taste profile to agent memory directory |
+| `opencode/` | OpenCode agent integration — writes tuning profile to agent memory directory |
 
-**Deployed:** 24 rules live in production store. Taste profile injected into OpenCode context (loaded every session). Continuous-learning skill active for mid-session correction capture. Scheduled decay via launchd (daily 03:00). Global `cedt1` CLI installed.
+**Deployed:** 24 rules live in production store. Tuning profile injected into OpenCode context (loaded every session). Continuous-learning skill active for mid-session correction capture. Scheduled decay via launchd (daily 03:00). Global `cedt1` CLI installed.
 
 **Key design choices locked:**
 - Confidence model: 0.70 start, +0.05/reinforcement, -0.01/day decay
@@ -43,4 +43,4 @@ Researched existing preference learning systems. Key findings that shaped CEDT-1
 
 ## Session 1 — 2026-07-17 — Project Init
 
-Repository created. Core concept defined: a continuous preference learning engine for AI agents that learns from corrections, compounds over time, and self-maintains. Named CEDT-1 (Continuous Experience-Driven Taste). MIT licensed.
+Repository created. Core concept defined: a continuous preference learning engine for AI agents that learns from corrections, compounds over time, and self-maintains. Named CEDT-1 (Continuous Experience-Driven Tuning). MIT licensed.

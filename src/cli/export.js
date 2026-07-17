@@ -4,7 +4,7 @@ import { loadAll, resolveConflicts } from '../store/index.js';
 
 export function exportMarkdown({ minConfidence = 0.3 } = {}) {
   const all = loadAll();
-  if (!all.length) return '# CEDT-1 Taste Profile\n\nNo rules yet.';
+  if (!all.length) return '# CEDT-1 Tuning Profile\n\nNo rules yet.';
 
   const { rules } = resolveConflicts(all);
   const live = rules
@@ -31,7 +31,7 @@ export function exportMarkdown({ minConfidence = 0.3 } = {}) {
     return `${header}\n${items}`;
   });
 
-  return `# CEDT-1 Taste Profile
+  return `# CEDT-1 Tuning Profile
 
 > Auto-generated ${now}. Updated continuously.
 > Binding (>=0.85): must follow. Preferred (0.55-0.84): strong preference. Suggestion (0.30-0.54): consider.

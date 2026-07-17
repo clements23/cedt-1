@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// cedt1 — Continuous Experience-Driven Taste engine CLI.
+// cedt1 — Continuous Experience-Driven Tuning engine CLI.
 
 import fs from 'node:fs';
 import { addRule, loadAll, resolveConflicts } from '../store/index.js';
@@ -13,7 +13,7 @@ const args = process.argv.slice(2);
 const cmd = args[0];
 
 function usage() {
-  console.log(`cedt1 — Continuous Experience-Driven Taste engine
+  console.log(`cedt1 — Continuous Experience-Driven Tuning engine
 
 Commands:
   status                        Show rule counts by category + conflict summary
@@ -23,7 +23,7 @@ Commands:
                                 Import from YAML stores, markdown configs, or lessons logs
   decay                         Run confidence decay + archive/prune
   export [--out PATH]           Emit plain markdown for any agent to read
-  inject [--out PATH]           Write taste profile to opencode memory dir
+  inject [--out PATH]           Write tuning profile to opencode memory dir
   sync [--no-push]              Commit + pull --rebase + push
   init [--remote URL]           Initialize git repo + optional remote
   list [--cat X]                List all rules (JSON)
