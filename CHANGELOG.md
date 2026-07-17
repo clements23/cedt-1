@@ -4,6 +4,36 @@ Per-session evolution log. Every change, decision, and pivot documented.
 
 ---
 
+## Session 3 — 2026-07-17 — CEDT-1 Built & Wired
+
+**What happened:**
+- Full implementation of CEDT-1 engine (12 source files, 4 test files)
+- 30/30 tests passing
+- 24 rules migrated: 7 from lessons.md + 17 from taste-2
+- Continuous-learning skill created and copied to `~/.config/opencode/skills/`
+- Taste profile injected: `~/.config/opencode/memory/taste-profile.md` (7,341 bytes)
+- Wired into opencode.json instructions array — loaded into every session
+- `cedt1` CLI installed globally via npm link
+- launchd plist for daily 03:00 decay pass
+
+**Components built:** 12 source files across 6 modules + exports + skill definition
+
+**Bugs fixed from taste-2:**
+- `decay/index.js` archive function had placeholder code (`globalThis.__yamlCache?.parse`). Replaced with working `yaml.parse()`.
+- `inject/index.js` null handling: now uses `??` to fall back to default path.
+- Extract category inference: moved specific categories (git, deploy, client-work) before broad ones (communication). Added `\bcli\b` word boundaries.
+- Heuristic ordering: capitalization check moved before always-do to avoid pattern overlap.
+
+**Migration results:** 24 rules total (5 client-work, 1 code, 6 communication, 10 content, 1 deploy, 1 general)
+
+**Deployed to:**
+- `~/.config/opencode/memory/taste-profile.md` — auto-loaded every session
+- `~/.config/opencode/skills/continuous-learning/SKILL.md` — capture corrections mid-session
+- `~/.cedt1/` — rule store (YAML per category), git-initialized
+- `~/Library/LaunchAgents/com.cedt1.decay.plist` — daily decay pass
+
+---
+
 ## Session 2 — 2026-07-17 — taste-2 Architecture Absorbed
 
 **What happened:**

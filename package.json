@@ -1,0 +1,23 @@
+{
+  "name": "cedt-1",
+  "version": "0.1.0",
+  "description": "Continuous Experience-Driven Taste engine — typed, conflict-aware preference learning for AI agents",
+  "type": "module",
+  "bin": {
+    "cedt1": "./src/cli/index.js"
+  },
+  "main": "./src/index.js",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "node src/cli/index.js"
+  },
+  "dependencies": {
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {},
+  "keywords": ["taste", "continuous-learning", "ai-agent", "preference-learning", "opencode"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  }
+}
