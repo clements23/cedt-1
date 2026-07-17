@@ -3,7 +3,7 @@
 
 import fs from 'node:fs';
 import { addRule, loadAll, resolveConflicts } from '../store/index.js';
-import { migrateAll, migrateFromTaste2, migrateFromTaste1, migrateFromLessons } from '../migrate/index.js';
+import { migrateAll, migrateFromYaml, migrateFromMarkdown, migrateFromLessons } from '../migrate/index.js';
 import { decay } from '../decay/index.js';
 import { sync, ensureRepo } from '../sync/index.js';
 import { exportMarkdown } from './export.js';
@@ -19,8 +19,8 @@ Commands:
   status                        Show rule counts by category + conflict summary
   add <text> [--cat X] [--conf 0..1] [--domain X] [--tags a,b]
                                 Add a rule explicitly
-  migrate [--from taste2|taste1|lessons|all] [--dry-run]
-                                Import from taste-2, taste-1, or lessons.md
+  migrate [--from yaml|md|lessons|all] [--dry-run]
+                                Import from YAML stores, markdown configs, or lessons logs
   decay                         Run confidence decay + archive/prune
   export [--out PATH]           Emit plain markdown for any agent to read
   inject [--out PATH]           Write taste profile to opencode memory dir
@@ -88,11 +88,11 @@ function migrateCmd(argv) {
   const dryRun = argv.includes('--dry-run');
   let result;
   switch (from) {
-    case 'taste2':
-      result = migrateFromTaste2({ dryRun });
+    case 'yaml':
+      result = migrateFromYaml({ dryRun });
       break;
-    case 'taste1':
-      result = migrateFromTaste1({ dryRun });
+    case 'md':
+      result = migrateFromMarkdown({ dryRun });
       break;
     case 'lessons':
       result = migrateFromLessons({ dryRun });

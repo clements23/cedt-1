@@ -122,5 +122,5 @@ cedt1 export          # Print full markdown export
 cedt1 decay           # Run confidence decay + archive
 cedt1 sync            # Git commit + pull + push
 cedt1 list            # List all rules as JSON
-cedt1 migrate         # Import from taste-1, taste-2, or lessons.md
+cedt1 migrate         # Import from existing config stores or lessons logs
 ```
