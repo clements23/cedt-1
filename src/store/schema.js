@@ -7,12 +7,14 @@
 // - scope: global = anywhere; domain = only when current task touches `domain`
 // - confidence: 0..1, calibrated over time via decay and reinforcement
 // - source: how this rule entered the system
-// - evidence: audit trail — the single biggest upgrade over markdown constraints
+// - evidence: audit trail for the rule, the single biggest upgrade over markdown constraints
 // - supersedes / superseded_by: linked list. Newest rule wins during resolution
 // - conflicts_with: bidirectional list of contradictory rule ids
 // - ttl_days: optional soft expiry for decay worker
 // - last_reinforced: timestamp of most recent reinforcement
 // - created_at: first entry timestamp
+
+import { randomBytes } from 'node:crypto';
 
 export const SOURCES = ['learned', 'explicit', 'migrated', 'inferred'];
 
@@ -55,7 +57,7 @@ export function validateRule(rule) {
 }
 
 export function cryptoId() {
-  return Math.random().toString(36).slice(2, 12);
+  return randomBytes(6).toString('base64url').slice(0, 10);
 }
 
 function clamp(n, lo, hi) {

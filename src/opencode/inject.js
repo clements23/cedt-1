@@ -11,7 +11,9 @@ import { loadAll, resolveConflicts } from '../store/index.js';
 
 const DEFAULT_OUT = path.join(os.homedir(), '.config', 'opencode', 'memory', 'tuning-profile.md');
 const MAX_INJECT = 40;
-const MIN_CONFIDENCE = 0.6;
+// Floor matches the documented SUGGEST tier: binding, preferred, and suggested
+// rules all reach the agent. Below 0.30 a rule has decayed out of usefulness.
+const MIN_CONFIDENCE = 0.3;
 
 export function injectContext({ cwd = process.cwd(), minConfidence = MIN_CONFIDENCE, maxRules = MAX_INJECT } = {}) {
   const rules = loadAll();
@@ -52,7 +54,7 @@ export function injectContext({ cwd = process.cwd(), minConfidence = MIN_CONFIDE
         const bindLabel = r.confidence >= 0.85 ? 'BINDING'
           : r.confidence >= 0.55 ? 'PREFERRED'
           : 'SUGGEST';
-        return `- ${r.text} [${bindLabel} — conf:${r.confidence.toFixed(2)}]`;
+        return `- ${r.text} [${bindLabel} conf:${r.confidence.toFixed(2)}]`;
       })
       .join('\n');
     return `## ${cat}\n${lines}`;
@@ -71,9 +73,9 @@ ${sections.join('\n\n')}
 `;
 }
 
-export function writeProfile({ out } = {}) {
+export function writeProfile({ out, minConfidence, maxRules } = {}) {
   const target = out ?? DEFAULT_OUT;
-  const context = injectContext();
+  const context = injectContext({ minConfidence, maxRules });
   if (!context) {
     return { wrote: false, reason: 'no rules to inject', out: target };
   }

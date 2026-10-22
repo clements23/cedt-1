@@ -116,10 +116,12 @@ export function supersede(oldId, newPartial) {
 }
 
 // resolveConflicts: when two rules conflict, prefer higher confidence, then newer last_reinforced.
+// Each conflicting pair is reported once, regardless of which side declares the link.
 export function resolveConflicts(rules) {
   const live = rules.filter((r) => !r.superseded_by);
   const winners = [];
   const conflicts = [];
+  const reported = new Set();
   for (const r of live) {
     const conflicting = live.filter(
       (x) => x.id !== r.id && r.conflicts_with?.includes(x.id),
@@ -133,7 +135,11 @@ export function resolveConflicts(rules) {
       return (b.last_reinforced ?? '').localeCompare(a.last_reinforced ?? '');
     });
     winners.push(group[0]);
-    conflicts.push({ winner: group[0].id, losers: group.slice(1).map((x) => x.id) });
+    const loserIds = group.slice(1).map((x) => x.id);
+    const key = [group[0].id, ...loserIds].sort().join('|');
+    if (reported.has(key)) continue;
+    reported.add(key);
+    conflicts.push({ winner: group[0].id, losers: loserIds });
   }
   return { rules: dedupeById(winners), conflicts };
 }

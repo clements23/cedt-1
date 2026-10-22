@@ -41,7 +41,7 @@ function normalize(s) {
 
 export function inferCategory(text) {
   const t = text.toLowerCase();
-  // Order matters — more specific categories checked first, then broader ones.
+  // Order matters: more specific categories checked first, then broader ones.
   const map = [
     // Specific tool/domain categories
     { pattern: '\\bcommit\\b|\\bgit\\b|\\bpr\\b|pull request|merge|rebase|squash', cat: 'git' },

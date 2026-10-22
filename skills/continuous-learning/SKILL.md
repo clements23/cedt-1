@@ -1,12 +1,12 @@
 # continuous-learning
 
-Continuously learn user preferences from every interaction. Detects corrections, extracts structured rules, and persists them to the CEDT-1 rule store. Rules compound over time — confidence increases with reinforcement, decays with silence.
+Continuously learn user preferences from every interaction. Detects corrections, extracts structured rules, and persists them to the CEDT-1 rule store. Rules compound over time: confidence increases with reinforcement, decays with silence.
 
 ## When to Fire
 
 **Auto-fire on:**
 - **Mid-session:** Whenever the user corrects you (contains "no,", "don't", "actually", "use X instead", "should be", "wrong", "incorrect", "not that", "never")
-- **Session end (5+ tool calls):** Batch process — success signals, decay, inject updated profile
+- **Session end (5+ tool calls):** Batch process: success signals, decay, inject updated profile
 
 ## Correction Detection (mid-session)
 
@@ -37,7 +37,7 @@ This automatically:
 1. Extracts the rule via heuristics (or LLM if CEDT1_EXTRACTOR_URL is set)
 2. Categorizes it (communication, content, code, git, deploy, client-work, general)
 3. Persists it with confidence 0.70 (or 0.5 if no heuristic matched)
-4. Deduplicates — if the same rule already exists, reinforces it instead (+0.05)
+4. Deduplicates: if the same rule already exists, reinforces it instead (+0.05)
 
 **Example:**
 ```
@@ -60,7 +60,7 @@ Run `cedt1 inject` to write the updated tuning profile to opencode's memory dire
 ```bash
 cedt1 inject
 ```
-This writes `~/.config/opencode/memory/tuning-profile.md` with all rules >= 0.6 confidence, formatted with binding levels.
+This writes `~/.config/opencode/memory/tuning-profile.md` with every rule at 0.30 confidence or higher (BINDING, PREFERRED, and SUGGEST tiers), grouped by category. Pass `--min-conf 0.55` to ship only the tiers you act on.
 
 ### 3. Decay Check
 Run `cedt1 decay` to decay stale rules:
@@ -116,11 +116,14 @@ Each rule in `~/.cedt1/rules/<category>.yaml`:
 ```bash
 cedt1 status          # Show rule counts + conflicts
 cedt1 learn "<text>"  # Extract and persist a rule from a correction
-cedt1 add "<text>"    # Manually add a rule
-cedt1 inject          # Write tuning profile to opencode memory
-cedt1 export          # Print full markdown export
+cedt1 add "<text>"    # Manually add a rule (flags go outside the quotes: --cat code)
+cedt1 inject          # Write tuning profile to opencode memory (--min-conf to raise the floor)
+cedt1 export          # Print full markdown export (--out PATH to write a file)
 cedt1 decay           # Run confidence decay + archive
-cedt1 sync            # Git commit + pull + push
+cedt1 sync            # Git commit + pull + push (--no-push to stay local)
+cedt1 init            # Initialize the git-backed store (--remote URL)
 cedt1 list            # List all rules as JSON
 cedt1 migrate         # Import from existing config stores or lessons logs
+cedt1 version         # Print version
+cedt1 help            # Show full usage
 ```

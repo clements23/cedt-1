@@ -1,12 +1,30 @@
 {
   "name": "cedt-1",
-  "version": "0.1.0",
-  "description": "Continuous Experience-Driven Tuning engine — typed, conflict-aware preference learning for AI agents",
+  "version": "0.2.0",
+  "description": "Continuous Experience-Driven Tuning: typed, conflict-aware preference learning for AI agents",
   "type": "module",
   "bin": {
     "cedt1": "./src/cli/index.js"
   },
   "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./store": "./src/store/index.js",
+    "./schema": "./src/store/schema.js",
+    "./extract": "./src/extract/index.js",
+    "./decay": "./src/decay/index.js",
+    "./migrate": "./src/migrate/index.js",
+    "./sync": "./src/sync/index.js",
+    "./inject": "./src/opencode/inject.js"
+  },
+  "files": [
+    "src",
+    "skills",
+    "README.md",
+    "ARCHITECTURE.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "node --test tests/*.test.js",
     "start": "node src/cli/index.js"
@@ -15,7 +33,22 @@
     "yaml": "^2.7.0"
   },
   "devDependencies": {},
-  "keywords": ["tuning", "continuous-learning", "ai-agent", "preference-learning", "opencode"],
+  "keywords": [
+    "tuning",
+    "continuous-learning",
+    "ai-agent",
+    "preference-learning",
+    "opencode",
+    "agent-memory"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clements23/cedt-1.git"
+  },
+  "homepage": "https://github.com/clements23/cedt-1#readme",
+  "bugs": {
+    "url": "https://github.com/clements23/cedt-1/issues"
+  },
   "license": "MIT",
   "engines": {
     "node": ">=18"

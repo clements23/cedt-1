@@ -20,14 +20,14 @@ The atomic unit. Every rule is a typed object:
 
 | Field | Type | Purpose |
 |-------|------|---------|
-| `id` | string | Stable identifier (crypto-random, 10-char base36) |
+| `id` | string | Stable identifier (crypto-random, 10-char base64url from `node:crypto`) |
 | `text` | string | Imperative constraint (e.g. "Never use em dashes.") |
 | `category` | string | Free-form grouping (communication, content, code, client-work, etc.) |
 | `scope` | `global` \| `domain` | Global = always apply. Domain = only when working in domain (e.g. "linkedin", "react") |
 | `domain` | string \| null | Required when scope is domain |
 | `confidence` | 0..1 | Calibrated over time. Starts at 0.70 (heuristic match) or 0.50 (no match) |
 | `source` | `learned` \| `explicit` \| `migrated` \| `inferred` | How the rule entered the system |
-| `evidence` | Evidence[] | Audit trail — every correction that created or reinforced this rule |
+| `evidence` | Evidence[] | Audit trail: every correction that created or reinforced this rule |
 | `supersedes` | string[] | IDs of rules this one replaces (linked list) |
 | `superseded_by` | string \| null | ID of rule that replaced this one |
 | `conflicts_with` | string[] | IDs of rules that contradict this one |
@@ -55,12 +55,12 @@ type Evidence = {
 
 | Event | Delta | Cap |
 |-------|-------|-----|
-| New rule (heuristic match) | 0.70 | — |
-| New rule (no heuristic match) | 0.50 | — |
+| New rule (heuristic match) | 0.70 | none |
+| New rule (no heuristic match) | 0.50 | none |
 | Reinforcement (same rule observed again) | +0.05 | 0.99 |
 | Decay (per day without reinforcement) | -0.01 | 0.10 floor |
-| Archived | rule moved at 0.25 | — |
-| Deleted | rule removed at 0.10 | — |
+| Archived | rule moved at 0.25 | none |
+| Deleted | rule removed at 0.10 | none |
 
 ### Design rationale
 - **0.70 start:** High enough to be applied immediately, low enough to decay if never reinforced
@@ -135,7 +135,7 @@ When two rules declare `conflicts_with` each other:
 When a user changes their mind, the old rule is NOT deleted. Instead:
 - Old rule gets `superseded_by: new_rule_id`
 - New rule gets `supersedes: [old_rule_id]`
-- Forms a linked list — full history preserved
+- Forms a linked list: full history preserved
 - During resolution, only non-superseded rules are active
 
 ---
@@ -145,10 +145,11 @@ When a user changes their mind, the old rule is NOT deleted. Instead:
 Runs on schedule (launchd/cron) or manually (`cedt1 decay`):
 
 1. For each non-superseded rule, compute days since `last_reinforced`
-2. If days > TTL (default 120) AND confidence < 0.10: delete
-3. Otherwise: subtract `DECAY_PER_DAY * days` from confidence
-4. If result < 0.25: move to archive.yaml
-5. Persist `{ last_run, stats }` to state/decay.json
+2. Subtract `DECAY_PER_DAY * days`, floor at 0, round to 4 decimals
+3. If the result is ≤ 0.10: delete the rule
+4. Else if past `ttl_days` (default 120) or the result is < 0.25: append to `archive.yaml`
+5. Else: persist the decayed confidence back to the category file
+6. Persist `{ last_run, stats }` to state/decay.json
 
 ---
 

@@ -1,4 +1,4 @@
-// CEDT-1 main entry — re-exports all public modules.
+// CEDT-1 main entry: re-exports all public modules.
 
 export { newRule, validateRule, cryptoId, SOURCES, SCOPES } from './store/schema.js';
 export {

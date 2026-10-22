@@ -1,6 +1,6 @@
 # CEDT-1
 
-**Continuous Experience-Driven Tuning — a preference learning engine for AI agents.**
+**Continuous Experience-Driven Tuning: a preference learning engine for AI agents.**
 
 CEDT-1 gives AI agents memory of your preferences. Instead of repeating yourself every session, the agent learns from your corrections and gets better over time. Every "no, do it this way" compounds into a structured rule that shapes future behavior.
 
@@ -14,34 +14,38 @@ Session → Correction detected → Rule extracted → Confidence scored → Fut
   └────────────────────── Reinforcement compounds, silence decays ──────────────┘
 ```
 
-1. **Detect** — The agent notices when you correct it ("no, use pnpm", "actually, named exports")
-2. **Extract** — The correction is turned into a structured imperative rule with a confidence score
-3. **Persist** — Rules are stored as typed objects with evidence trails (where did this come from?)
-4. **Apply** — Rules are injected into future sessions. Binding (≥0.85), preferred (0.55-0.84), or suggested (0.30-0.54)
-5. **Self-maintain** — Confidence decays without reinforcement. Stale rules archive. Conflicting rules self-resolve.
+1. **Detect**: The agent notices when you correct it ("no, use pnpm", "actually, named exports")
+2. **Extract**: The correction is turned into a structured imperative rule with a confidence score
+3. **Persist**: Rules are stored as typed objects with evidence trails (where did this come from?)
+4. **Apply**: Rules are injected into future sessions. Binding (≥0.85), preferred (0.55-0.84), or suggested (0.30-0.54)
+5. **Self-maintain**: Confidence decays without reinforcement. Stale rules archive. Conflicting rules self-resolve.
 
 ## Use Cases
 
 | Domain | Example rule (learned from a single correction) |
 |--------|--------------------------------------------------|
-| **Content & voice** | "Never use em dashes. Replace with ' — '." — confidence: 0.92 |
-| **Code style** | "Use named exports. Never default exports." — confidence: 0.85 |
-| **Business methodology** | "For client reports: green = positive business outcome, not raw metric direction." — confidence: 0.93 |
-| **Deploy & ops** | "After every Vercel deploy, verify the custom domain alias resolved." — confidence: 0.95 |
-| **Communication** | "Be terse. Default to ≤3 lines. No preamble." — confidence: 0.88 |
-| **Publishing workflow** | "Every published article MUST include a copy-pasteable LinkedIn draft." — confidence: 0.99 |
+| **Content & voice** | "Never use em dashes. Replace them with commas." (confidence: 0.92) |
+| **Code style** | "Use named exports. Never default exports." (confidence: 0.85) |
+| **Business methodology** | "For client reports: green = positive business outcome, not raw metric direction." (confidence: 0.93) |
+| **Deploy & ops** | "After every Vercel deploy, verify the custom domain alias resolved." (confidence: 0.95) |
+| **Communication** | "Be terse. Default to ≤3 lines. No preamble." (confidence: 0.88) |
+| **Publishing workflow** | "Every published article MUST include a copy-pasteable LinkedIn draft." (confidence: 0.99) |
 
 ## Quick Start
 
 ```bash
-# Install
-npm i -g cedt-1
+# Install from GitHub
+npm i -g github:clements23/cedt-1
+
+# ...or clone and link locally
+git clone https://github.com/clements23/cedt-1.git
+cd cedt-1 && npm install && npm link
 
 # Seed from existing configs
 cedt1 migrate
 
 # Add a rule manually
-cedt1 add "Use pnpm instead of npm. --cat code"
+cedt1 add "Use pnpm instead of npm." --cat code
 
 # Or let the agent learn it from a correction
 cedt1 learn "No, don't use npm here, use pnpm"
@@ -59,17 +63,17 @@ Every rule is a typed object, not a bullet point:
 
 ```yaml
 - id: a1b2c3d4e5
-  text: Never use em dashes. Replace with " — ".
+  text: Never use em dashes. Replace them with commas.
   category: content
   scope: global
   confidence: 0.92          # compounds with reinforcement, decays with silence
   source: learned           # learned | explicit | migrated | inferred
-  evidence:                 # audit trail — every correction that produced this rule
+  evidence:                 # audit trail: every correction that produced this rule
     - kind: user-correction
       raw: "no, don't use em dashes"
       at: 2026-07-17T10:00:00.000Z
   conflicts_with: []        # if two rules contradict, higher confidence wins
-  supersedes: []            # linked list — when you change your mind, history stays
+  supersedes: []            # linked list: when you change your mind, history stays
   last_reinforced: 2026-07-17T12:00:00.000Z
 ```
 
@@ -94,6 +98,7 @@ Deleted (below 0.10) → removed
 │   └── client-work.yaml
 └── state/
     ├── evidence.jsonl         # Append-only audit log
+    ├── decay.json             # Last decay run metadata
     └── archive.yaml           # Pruned rules
 
 src/                           # Engine source
@@ -104,6 +109,9 @@ src/                           # Engine source
 ├── cli/                       # `cedt1` command
 ├── migrate/                   # Import from existing configs
 └── opencode/                  # OpenCode agent integration
+
+tests/                         # 60 tests: store, extract, decay, migrate, profile, CLI
+skills/                        # Agent skill for mid-session correction capture
 ```
 
 ## Integration
@@ -117,14 +125,27 @@ CEDT-1 is agent-agnostic. The engine runs as a CLI. Integration is two lines:
 ## Commands
 
 ```
-cedt1 status       Show rule counts by category
-cedt1 add <text>   Add a rule explicitly
-cedt1 learn <text> Extract and persist a rule from a correction
-cedt1 inject       Write tuning profile to agent's context
-cedt1 export       Emit plain markdown (any agent)
-cedt1 decay        Run confidence decay + archive
-cedt1 sync         Git commit + pull + push
-cedt1 migrate      Import from existing config stores
+cedt1 status                    Show rule counts by category + conflicts
+cedt1 add <text> [--cat X]      Add a rule explicitly
+cedt1 learn <text>              Extract and persist a rule from a correction
+cedt1 list [--cat X]            Dump all rules as JSON
+cedt1 inject [--min-conf 0..1]  Write tuning profile to agent's context
+cedt1 export [--min-conf 0..1]  Emit plain markdown (any agent)
+cedt1 decay                     Run confidence decay + archive
+cedt1 sync [--no-push]          Git commit + pull + push
+cedt1 init [--remote URL]       Initialize the git-backed store
+cedt1 migrate [--dry-run]       Import from existing config stores
+cedt1 version                   Print version
+cedt1 help                      Show usage
+```
+
+`inject` and `export` accept `--min-conf` (default 0.30, the SUGGEST floor) so you can ship only the tiers you want to an agent.
+
+## Development
+
+```bash
+npm install   # one runtime dependency: yaml
+npm test      # 60 tests: store, extract, decay, migrate, profile, CLI
 ```
 
 ## License

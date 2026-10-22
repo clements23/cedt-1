@@ -3,13 +3,14 @@
 //   2. pull --rebase (fast-forward only)
 //   3. push (no-op if no remote configured)
 
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { paths, ensureStore } from '../store/index.js';
 
+// argv array, never a shell string, so remote URLs and messages are not shell-interpolated.
 function git(args, opts = {}) {
-  return execSync(`git ${args}`, {
+  return execFileSync('git', args, {
     cwd: paths.ROOT,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
@@ -20,40 +21,40 @@ function git(args, opts = {}) {
 export function ensureRepo({ remote = null } = {}) {
   ensureStore();
   if (!fs.existsSync(path.join(paths.ROOT, '.git'))) {
-    git('init -b main');
-    git('config user.email "cedt1@local"');
-    git('config user.name "cedt1"');
-    git('add .');
-    git('commit -m "cedt1: initial commit" --allow-empty');
+    git(['init', '-b', 'main']);
+    git(['config', 'user.email', 'cedt1@local']);
+    git(['config', 'user.name', 'cedt1']);
+    git(['add', '.']);
+    git(['commit', '-m', 'cedt1: initial commit', '--allow-empty']);
   }
   if (remote) {
-    const existing = git('remote').split('\n').filter(Boolean);
+    const existing = git(['remote']).split('\n').filter(Boolean);
     if (!existing.includes('origin')) {
-      git(`remote add origin ${remote}`);
+      git(['remote', 'add', 'origin', remote]);
     }
   }
 }
 
 export function sync({ push = true } = {}) {
   ensureRepo();
-  const status = git('status --porcelain');
+  const status = git(['status', '--porcelain']);
   if (status) {
-    git('add .');
+    git(['add', '.']);
     const summary = summarizeStatus(status);
-    git(`commit -m "cedt1: ${summary}"`);
+    git(['commit', '-m', `cedt1: ${summary}`]);
   }
   let pulled = '';
   try {
-    pulled = git('pull --rebase --autostash');
+    pulled = git(['pull', '--rebase', '--autostash']);
   } catch {
-    // No remote yet — fine.
+    // No remote yet, which is fine.
   }
   let pushed = '';
   if (push) {
     try {
-      pushed = git('push');
+      pushed = git(['push']);
     } catch {
-      // No remote or offline — fine.
+      // No remote or offline, which is fine.
     }
   }
   return { status: status || 'clean', pulled, pushed };

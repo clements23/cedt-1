@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// cedt1 — Continuous Experience-Driven Tuning engine CLI.
+// cedt1: Continuous Experience-Driven Tuning engine CLI.
 
 import fs from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { addRule, loadAll, resolveConflicts } from '../store/index.js';
 import { migrateAll, migrateFromYaml, migrateFromMarkdown, migrateFromLessons } from '../migrate/index.js';
 import { decay } from '../decay/index.js';
@@ -9,11 +10,15 @@ import { sync, ensureRepo } from '../sync/index.js';
 import { exportMarkdown } from './export.js';
 import { writeProfile } from '../opencode/inject.js';
 
+const pkg = JSON.parse(
+  fs.readFileSync(fileURLToPath(new URL('../../package.json', import.meta.url)), 'utf8'),
+);
+
 const args = process.argv.slice(2);
 const cmd = args[0];
 
 function usage() {
-  console.log(`cedt1 — Continuous Experience-Driven Tuning engine
+  console.log(`cedt1 ${pkg.version} - Continuous Experience-Driven Tuning engine
 
 Commands:
   status                        Show rule counts by category + conflict summary
@@ -22,12 +27,21 @@ Commands:
   migrate [--from yaml|md|lessons|all] [--dry-run]
                                 Import from YAML stores, markdown configs, or lessons logs
   decay                         Run confidence decay + archive/prune
-  export [--out PATH]           Emit plain markdown for any agent to read
-  inject [--out PATH]           Write tuning profile to opencode memory dir
+  export [--out PATH] [--min-conf 0..1]
+                                Emit plain markdown for any agent to read
+  inject [--out PATH] [--min-conf 0..1]
+                                Write tuning profile to opencode memory dir
   sync [--no-push]              Commit + pull --rebase + push
   init [--remote URL]           Initialize git repo + optional remote
   list [--cat X]                List all rules (JSON)
   learn <correction>            Extract and persist a rule from a correction
+  version                       Print version
+  help                          Show this message
+
+Environment:
+  CEDT1_HOME                    Rule store location (default ~/.cedt1)
+  CEDT1_EXTRACTOR_URL           OpenAI-compatible endpoint for LLM rule refinement
+  CEDT1_EXTRACTOR_MODEL         Model name for the extractor (default deepseek/deepseek-v4-pro)
 `);
 }
 
@@ -53,6 +67,14 @@ async function main() {
       return listCmd(args.slice(1));
     case 'learn':
       return await learnCmd(args.slice(1));
+    case 'version':
+    case '--version':
+    case '-v':
+      return console.log(pkg.version);
+    case 'help':
+    case '--help':
+    case '-h':
+      return usage();
     default:
       usage();
   }
@@ -68,8 +90,27 @@ function statusCmd() {
   console.log(JSON.stringify({ total: rules.length, by_category: byCat, conflicts }, null, 2));
 }
 
+// Flags that consume the next argument as their value. Without this, a command
+// like `cedt1 add "Use pnpm." --cat code` would fold "code" into the rule text.
+const VALUE_FLAGS = new Set([
+  '--cat', '--conf', '--domain', '--tags', '--min-conf', '--out', '--from', '--remote',
+]);
+
+function positional(argv) {
+  const out = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a.startsWith('-')) {
+      if (VALUE_FLAGS.has(a)) i++;
+      continue;
+    }
+    out.push(a);
+  }
+  return out;
+}
+
 function addCmd(argv) {
-  const text = argv.filter((a) => !a.startsWith('--')).join(' ');
+  const text = positional(argv).join(' ');
   if (!text) throw new Error('usage: cedt1 add <text> [--cat X] [--conf 0..1]');
   const rule = addRule({
     text,
@@ -105,7 +146,7 @@ function migrateCmd(argv) {
 
 function exportCmd(argv) {
   const out = flag(argv, '--out');
-  const md = exportMarkdown();
+  const md = exportMarkdown({ minConfidence: minConf(argv) });
   if (out) {
     fs.writeFileSync(out, md);
     console.log(`wrote ${out}`);
@@ -116,8 +157,13 @@ function exportCmd(argv) {
 
 function injectCmd(argv) {
   const out = flag(argv, '--out');
-  const result = writeProfile({ out });
+  const result = writeProfile({ out, minConfidence: minConf(argv) });
   console.log(JSON.stringify(result, null, 2));
+}
+
+function minConf(argv) {
+  const raw = flag(argv, '--min-conf');
+  return raw === null ? undefined : parseFloat(raw);
 }
 
 function listCmd(argv) {
@@ -127,7 +173,7 @@ function listCmd(argv) {
 }
 
 async function learnCmd(argv) {
-  const correction = argv.filter((a) => !a.startsWith('--')).join(' ');
+  const correction = positional(argv).join(' ');
   if (!correction) throw new Error('usage: cedt1 learn <correction text>');
   const { extract } = await import('../extract/index.js');
   const candidate = await extract(correction);
